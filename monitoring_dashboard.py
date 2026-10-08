@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-
+import os
 import mlflow
 import pandas as pd
 import streamlit as st
@@ -12,7 +12,10 @@ import streamlit as st
 
 DB_PATH = "data/monitoring.db"
 
-MLFLOW_TRACKING_URI = "http://localhost:5000"
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI",
+    "http://localhost:5000"
+)
 
 ALERT_EXPERIMENT = "Fraud_Detection_Alerts"
 
@@ -279,7 +282,7 @@ except Exception as e:
 
 import requests
 
-API_URL = "http://localhost:8000/predict"
+API_URL = os.getenv("API_URL", "http://localhost:8000/predict")
 
 st.markdown("## 🧪 Test Transaction")
 

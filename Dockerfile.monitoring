@@ -1,0 +1,23 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements-docker.txt .
+
+RUN grep -v "^xgboost==" requirements-docker.txt > requirements-no-xgboost.txt && \
+    pip install --no-cache-dir --timeout=300 --retries=10 -r requirements-no-xgboost.txt
+
+RUN pip install --no-cache-dir --timeout=300 --retries=10 --no-deps xgboost==3.4.1
+
+COPY monitoring_worker.py .
+COPY run_monitoring.py .
+COPY data_quality_monitoring.py .
+COPY drift_monitoring.py .
+COPY monitoring_alerts.py .
+COPY monitoring_mlflow.py .
+
+CMD ["python", "-u", "monitoring_worker.py"]

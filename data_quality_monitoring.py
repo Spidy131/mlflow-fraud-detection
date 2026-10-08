@@ -21,7 +21,10 @@ MONITORING_END_ID = int(
 
 MONITORING_DB = "data/monitoring.db"
 
-MLFLOW_TRACKING_URI = "http://localhost:5000"
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI",
+    "http://localhost:5000"
+)
 
 EXPERIMENT_NAME = "Fraud_Detection_Data_Quality"
 

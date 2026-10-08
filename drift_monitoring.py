@@ -12,7 +12,10 @@ import os
 MONITORING_DB = "data/monitoring.db"
 TRAIN_PATH = "data/processed/fraud_baseline.csv"
 
-MLFLOW_TRACKING_URI = "http://localhost:5000"
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI",
+    "http://localhost:5000"
+)
 EXPERIMENT_NAME = "Fraud_Detection_Drift_Monitoring"
 
 MONITORING_START_ID = int(

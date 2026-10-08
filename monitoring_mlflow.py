@@ -1,10 +1,13 @@
 import sqlite3
 import mlflow
 from datetime import datetime, timezone
-
+import os
 DB_PATH = "data/monitoring.db"
 
-MLFLOW_TRACKING_URI = "http://localhost:5000"
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI",
+    "http://localhost:5000"
+)
 EXPERIMENT_NAME = "Fraud_Detection_Monitoring"
 
 MODEL_NAME = "XGBoost_Fraud_Production"

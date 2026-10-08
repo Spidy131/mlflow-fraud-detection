@@ -1,0 +1,100 @@
+services:
+
+  mlflow:
+    image: python:3.12-slim
+    container_name: fraud-mlflow
+    working_dir: /mlflow
+
+    volumes:
+      - ./mlflow.db:/mlflow/mlflow.db
+      - ./mlruns:/mlflow/mlruns
+
+    ports:
+      - "5000:5000"
+
+    command: >
+      sh -c "
+      pip install --no-cache-dir mlflow==3.16.0 &&
+      mlflow server
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root file:///mlflow/mlruns
+      --host 0.0.0.0
+      --port 5000
+      --allowed-hosts localhost:5000,127.0.0.1:5000,mlflow:5000
+      "
+
+    restart: unless-stopped
+
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: fraud-api-compose
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+
+    volumes:
+      - ./mlruns/1/models/m-18ad4f3607054746bc16a483bae1467c/artifacts:/models:ro
+      - ./data:/app/data
+
+    depends_on:
+      - mlflow
+
+    restart: unless-stopped
+
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: fraud-dashboard
+
+    ports:
+      - "8502:8501"
+
+    environment:
+      API_URL: http://api:8000/predict
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+
+    volumes:
+      - ./data:/app/data
+      - ./monitoring_dashboard.py:/app/monitoring_dashboard.py:ro
+
+    command: >
+      streamlit run monitoring_dashboard.py
+      --server.address=0.0.0.0
+      --server.port=8501
+
+    depends_on:
+      - api
+      - mlflow
+
+    restart: unless-stopped
+
+
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitoring
+
+    container_name: fraud-monitoring-worker
+
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MONITORING_INTERVAL_SECONDS: 3600
+
+    volumes:
+      - ./data:/app/data
+
+    depends_on:
+      - mlflow
+      - api
+
+    restart: unless-stopped

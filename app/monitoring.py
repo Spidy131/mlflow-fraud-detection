@@ -2,15 +2,8 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 import json
-import mlflow
-import pandas as pd
-import streamlit as st
 
-DB_PATH = "data/monitoring.db"
-
-API_URL = "http://localhost:8000/predict"
-
-MLFLOW_TRACKING_URI = "http://localhost:5000"
+DB_PATH = Path("/app/data/monitoring.db")
 
 
 def get_connection():
