@@ -10,7 +10,7 @@ import os
 # ============================================================
 
 MONITORING_DB = "data/monitoring.db"
-TRAIN_PATH = "data/processed/fraud_baseline.csv"
+PSI_REFERENCE_PATH = "data/processed/psi_reference.json"
 
 MLFLOW_TRACKING_URI = os.getenv(
     "MLFLOW_TRACKING_URI",
@@ -49,11 +49,19 @@ print(
 
 
 # ============================================================
-# LOAD TRAINING / REFERENCE DATA
+# LOAD PSI REFERENCE DATA
 # ============================================================
 
 print()
-print("Loading training/reference data...")
+print("Loading PSI reference data...")
+
+with open(
+    PSI_REFERENCE_PATH,
+    "r",
+    encoding="utf-8"
+) as file:
+
+    psi_reference = json.load(file)
 
 drift_features = [
     "TransactionAmt",
@@ -66,14 +74,20 @@ drift_features = [
     "dist1",
 ]
 
-train_df = pd.read_csv(
-    TRAIN_PATH,
-    usecols=drift_features
+print(
+    f"Reference features: {len(psi_reference['features'])}"
 )
 
-print(
-    f"Reference rows: {len(train_df)}"
-)
+for feature in drift_features:
+
+    breakpoints = psi_reference["features"][feature]["breakpoints"]
+
+    print(
+        f"{feature:<20} "
+        f"reference_count="
+        f"{psi_reference['features'][feature]['count']} "
+        f"breakpoints={len(breakpoints)}"
+    )
 
 
 # ============================================================
@@ -255,47 +269,32 @@ if production_df.empty:
 # ============================================================
 
 def calculate_psi(
-    reference,
     current,
-    bins=10
+    breakpoints,
+    reference_counts
 ):
-
-    reference = pd.to_numeric(
-        reference,
-        errors="coerce"
-    ).dropna().values
 
     current = pd.to_numeric(
         current,
         errors="coerce"
     ).dropna().values
 
+    breakpoints = np.array(
+        breakpoints,
+        dtype=float
+    )
+
+    reference_counts = np.array(
+        reference_counts,
+        dtype=float
+    )
+
     if (
-        len(reference) == 0
-        or len(current) == 0
+        len(current) == 0
+        or len(breakpoints) < 3
+        or len(reference_counts) == 0
     ):
         return 0.0
-
-    breakpoints = np.percentile(
-        reference,
-        np.linspace(
-            0,
-            100,
-            bins + 1
-        )
-    )
-
-    breakpoints = np.unique(
-        breakpoints
-    )
-
-    if len(breakpoints) < 3:
-        return 0.0
-
-    reference_counts, _ = np.histogram(
-        reference,
-        bins=breakpoints
-    )
 
     current_counts, _ = np.histogram(
         current,
@@ -303,7 +302,7 @@ def calculate_psi(
     )
 
     reference_pct = np.clip(
-        reference_counts / len(reference),
+        reference_counts / np.sum(reference_counts),
         0.0001,
         None
     )
@@ -325,7 +324,6 @@ def calculate_psi(
 
     return float(psi)
 
-
 # ============================================================
 # CALCULATE PSI
 # ============================================================
@@ -338,14 +336,14 @@ psi_results = {}
 
 for feature in drift_features:
 
-    if (
-        feature in train_df.columns
-        and feature in production_df.columns
-    ):
+    if feature in production_df.columns:
+
+        reference_feature = psi_reference["features"][feature]
 
         psi = calculate_psi(
-            train_df[feature],
-            production_df[feature]
+            production_df[feature],
+            reference_feature["breakpoints"],
+            reference_feature["reference_counts"]
         )
 
     else:

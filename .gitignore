@@ -26,7 +26,8 @@ mlflow-env/
 # Dataset
 # ==========================================
 data/raw/
-data/processed/
+data/processed/*
+!data/processed/psi_reference.json
 
 # ==========================================
 # Databases
@@ -107,3 +108,8 @@ monitoring_batch_*.csv
 parity_results_*.csv
 threshold_analysis_results.csv
 fraud_test_transactions.json
+# ==========================================
+# Production model artifacts
+# ==========================================
+model_artifacts/*
+!model_artifacts/model_metadata.json

@@ -40,7 +40,7 @@ services:
       MLFLOW_TRACKING_URI: http://mlflow:5000
 
     volumes:
-      - ./mlruns/1/models/m-18ad4f3607054746bc16a483bae1467c/artifacts:/models:ro
+      - ./model_artifacts:/models:ro
       - ./data:/app/data
 
     depends_on:

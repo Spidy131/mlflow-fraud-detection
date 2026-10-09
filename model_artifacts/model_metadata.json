@@ -1,0 +1,10 @@
+{
+  "model_name": "XGBoost_Fraud_Production",
+  "model_alias": "production",
+  "model_version": "1",
+  "framework": "xgboost",
+  "xgboost_version": "3.4.1",
+  "threshold": 0.78,
+  "artifact": "model.ubj",
+  "sha256": "D97CC8A3AE85501B7356B527B86FBB7DBFDD544F014714569C9B84E3C7E0043E"
+}

@@ -13,7 +13,6 @@ RUN pip install --no-cache-dir --timeout=300 --retries=10 --no-deps xgboost==3.4
 
 COPY app ./app
 
-COPY models/fraud_model.skops ./models/fraud_model.skops
 COPY models/threshold.txt ./models/threshold.txt
 
 EXPOSE 8000
