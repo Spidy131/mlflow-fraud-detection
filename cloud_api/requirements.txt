@@ -4,3 +4,4 @@ numpy==2.2.6
 pandas==3.0.5
 xgboost==3.4.1
 pydantic
+pyarrow

@@ -1,4 +1,3 @@
-@'
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import hashlib
@@ -292,4 +291,4 @@ def predict(transaction: Transaction):
 # ============================================================
 
 print("Cloud API initialization completed.")
-'@ | Set-Content -Encoding utf8 cloud_api\app\main.py
+#'@ | Set-Content -Encoding utf8 cloud_api\app\main.py
