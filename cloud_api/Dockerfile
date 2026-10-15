@@ -10,13 +10,15 @@ COPY cloud_api/app ./app
 
 RUN mkdir -p /app/model
 
-# Download production model from GitHub Release v1.0.0
-ARG MODEL_URL
-RUN python -c "import os, urllib.request; url=os.environ.get('MODEL_URL'); assert url, 'MODEL_URL build argument is required'; urllib.request.urlretrieve(url, '/app/model/model.ubj')"
+# Production model
+ENV MODEL_URL="https://github.com/Spidy131/mlflow-fraud-detection/releases/download/v1.0.0/model.ubj"
+ENV MODEL_SHA256="D97CC8A3AE85501B7356B527B86FBB7DBFDD544F014714569C9B84E3C7E0043E"
+
+# Download production model
+RUN python -c "import os, urllib.request; url=os.environ['MODEL_URL']; urllib.request.urlretrieve(url, '/app/model/model.ubj')"
 
 # Verify production model checksum
-ARG MODEL_SHA256
-RUN python -c "import hashlib, os; p='/app/model/model.ubj'; expected=os.environ.get('MODEL_SHA256','').lower(); actual=hashlib.sha256(open(p,'rb').read()).hexdigest().lower(); assert expected and actual == expected, f'Checksum mismatch: expected={expected}, actual={actual}'; print('Model SHA256 verified:', actual)"
+RUN python -c "import hashlib, os; p='/app/model/model.ubj'; expected=os.environ['MODEL_SHA256'].lower(); actual=hashlib.sha256(open(p,'rb').read()).hexdigest().lower(); assert actual == expected, f'Checksum mismatch: expected={expected}, actual={actual}'; print('Model SHA256 verified:', actual)"
 
 EXPOSE 8000
 

@@ -181,6 +181,16 @@ class Transaction(BaseModel):
 # HEALTH CHECK
 # ============================================================
 
+@app.get("/healthz")
+def healthz():
+    return {
+        "status": "healthy",
+        "model": MODEL_NAME,
+        "model_version": MODEL_VERSION,
+        "threshold": THRESHOLD,
+    }
+
+
 @app.get("/")
 def health_check():
 
